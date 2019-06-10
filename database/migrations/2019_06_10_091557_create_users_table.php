@@ -14,10 +14,11 @@ class CreateUsersTable extends Migration {
 	{
 		Schema::create('users', function(Blueprint $table)
 		{
-			$table->string('phone_number', 12)->primary();
+			$table->increments('id');
+			$table->string('phone_number', 12)->unique('phone_number_unique');
 			$table->string('name', 100);
 			$table->string('profile_pic_url')->nullable();
-			$table->integer('jro_puri_id')->index('users_jro_puri');
+			$table->integer('jro_puri_id')->nullable()->index('users_jro_puri');
 			$table->integer('member_type')->default(0)->comment('0: basic; 1: officer; 2: superuser');
 			$table->timestamps();
 		});

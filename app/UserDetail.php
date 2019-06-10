@@ -9,7 +9,7 @@ class UserDetail extends Model
 	protected $table = 'users_detail';
 
     protected $fillable = [
-        'phone_number',
+        'user_id',
         'birthdate',
         'is_male',
         'is_married',
@@ -17,4 +17,8 @@ class UserDetail extends Model
         'job',
         'business',
     ];
+
+    public function summary() {
+        return $this->belongsTo('App\User');
+    }
 }

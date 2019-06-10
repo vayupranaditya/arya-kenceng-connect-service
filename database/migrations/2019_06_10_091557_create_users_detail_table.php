@@ -14,13 +14,13 @@ class CreateUsersDetailTable extends Migration {
 	{
 		Schema::create('users_detail', function(Blueprint $table)
 		{
-			$table->string('phone_number', 12)->primary();
-			$table->date('birthdate');
-			$table->boolean('is_male');
-			$table->boolean('is_married');
-			$table->string('current_address', 200);
-			$table->string('job', 50);
-			$table->string('business', 50);
+			$table->integer('user_id')->unsigned()->primary();
+			$table->date('birthdate')->nullable();
+			$table->boolean('is_male')->nullable();
+			$table->boolean('is_married')->nullable();
+			$table->string('current_address', 200)->nullable();
+			$table->string('job', 50)->nullable();
+			$table->string('business', 50)->nullable();
 			$table->timestamps();
 		});
 	}
