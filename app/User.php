@@ -26,7 +26,7 @@ class User extends Model
     }
 
     public function detail() {
-        return $this->hasOne('App\UserDetail', 'id');
+        return $this->hasOne('App\UserDetail', 'user_id');
     }
 
     public function promo_used() {

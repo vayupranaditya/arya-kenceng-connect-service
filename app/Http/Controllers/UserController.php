@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\DB;
 class UserController extends Controller
 {
 
-    private function db_error() {
+    private function db_error()
+    {
         return response()->json([
             'message' => 'Please try again'
         ], 400);
@@ -24,13 +25,13 @@ class UserController extends Controller
      */
     public function index()
     {
-      return User::all([
-        'id',
-        'name',
-        'phone_number',
-        'profile_pic_url',
-        'jro_puri_id',
-      ]);
+        $_user = User::with('jro_puri')->inRandomOrder()->simplePaginate(10, [
+            'id',
+            'name',
+            'profile_pic_url',
+            'jro_puri_id',
+        ]);
+        return $_user;
     }
 
     /**
@@ -95,19 +96,29 @@ class UserController extends Controller
      */
     public function show(String $user_id)
     {
-        print_r(int($user_id));
-        try {
-            $user = DB::table('users')
-                    ->where('users.id', $user_id)
-                    ->join('users_detail', 'users.id', '=', 'users_detail.user_id')
-                    ->join('jro_puri', 'users.jro_puri_id', '=', 'jro_puri.id')
-                    ->select('users.*', 'jro_puri.name as jro_puri_name', 'users_detail.*')
-                    ->first();
-            return response()->json($user, 200);
-        } catch(Exception $e) {
+        try{
+            $_user = User::find($user_id);
+            $_jro_puri = $_user->jro_puri;
+            $_detail = $_user->detail;
+        } catch (Exception $e) {
             print_r($e);
             return $this->db_error();
         }
+        $data = [
+            'id' => $_user->id,
+            'profile_pic_url' => $_user->profile_pic_url,
+            'name' => $_user->name,
+            'jro_puri_name' => $_jro_puri->name,
+            'member_type' => $_user->member_type == 1 ? 'Anggota' : ($_user->member_type == 2 ? 'Pengurus' : 'Admin'),
+            'birthdate' => $_detail->birthdate,
+            'gender' => $_detail->is_male ? 'Laki-laki' : 'Perempuan',
+            'status' => $_detail->is_married ? 'Married' : 'Single',
+            'address' => $_detail->current_address,
+            'phone_number' => $_user->phone_number,
+            'job' => $_detail->job,
+            'business' => $_detail->business
+        ];
+        return response()->json($data, 200);
     }
 
     /**
@@ -132,10 +143,9 @@ class UserController extends Controller
                 $q = substr_replace($q, '0', 0, 2);
             }
             print_r($q);
-            $result = User::where('phone_number', $q)->first([
+            $result = User::where('phone_number', $q)->with('jro_puri')->first([
                 'id',
                 'name',
-                'phone_number',
                 'profile_pic_url',
                 'jro_puri_id',
                 'member_type'
@@ -143,28 +153,17 @@ class UserController extends Controller
         } else {
             print_r('gagal');
             $result = DB::table('users')
-                        ->where('name', 'like', '%'.$request->q.'%')
-                        ->get([
-                            'id',
-                            'name',
-                            'phone_number',
-                            'profile_pic_url',
-                            'jro_puri_id',
-                            'member_type'
-                        ]);
+                ->where('name', 'like', '%' . $request->q . '%')
+                ->get([
+                    'id',
+                    'name',
+                    'phone_number',
+                    'profile_pic_url',
+                    'jro_puri_id',
+                    'member_type'
+                ]);
         }
         return response()->json($result, 200);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\User  $user
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(User $user)
-    {
-        //
     }
 
     /**
