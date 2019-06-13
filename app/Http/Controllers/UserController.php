@@ -95,6 +95,7 @@ class UserController extends Controller
      */
     public function show(String $user_id)
     {
+        print_r(int($user_id));
         try {
             $user = DB::table('users')
                     ->where('users.id', $user_id)
@@ -122,10 +123,16 @@ class UserController extends Controller
         ]);
         if ($validator->fails()) return response()->json($validator->errors(), 400);
         $is_phone = Validator::make($request->all(), [
-            'q' => 'regex:/08[0-9]{8,10}/'
+            'q' => array('regex:/(08|62|\+62)(([0-9]{8,10})|([0-9](-([0-9]{3})){3})|[0-9]{2}(-[0-9]{4}){2})/')
         ]);
         if (!$is_phone->fails()) {
-            $result = User::where('phone_number', $request->q)->first([
+            $q = str_replace('-', '', $request->q);
+            $q = str_replace('+', '', $q);
+            if (substr($q, 0, 2) == '62') {
+                $q = substr_replace($q, '0', 0, 2);
+            }
+            print_r($q);
+            $result = User::where('phone_number', $q)->first([
                 'id',
                 'name',
                 'phone_number',
@@ -134,6 +141,7 @@ class UserController extends Controller
                 'member_type'
             ]);
         } else {
+            print_r('gagal');
             $result = DB::table('users')
                         ->where('name', 'like', '%'.$request->q.'%')
                         ->get([
@@ -162,12 +170,13 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  String $user_id
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(String $user_id, Request $request)
     {
+        // $request->
         return response()->json([
             'title' => 'Edit',
             'message' => 'Change this'
